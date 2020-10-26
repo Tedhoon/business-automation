@@ -43,3 +43,24 @@ class Cafe24(models.Model):
     # 메모2 [ ]
     memo3 = models.TextField('메모3', blank=True)
     # 메모3 [ ]
+
+
+    class Meta:
+        verbose_name = "카페24"
+        verbose_name_plural = "카페24"  
+
+
+TYPE_CHOICES = (
+    ('CAFE 24', 'CAFE 24'),
+    ('네이버 스토어팜', '네이버 스토어팜'),
+    ('기타', '기타')
+)
+
+class DeliveryExcel(models.Model):
+    uploaded_at = models.DateField('업로드 날짜', default=datetime.today())
+    excel_file = models.FileField('송장 엑셀', upload_to="excel")
+    source = models.CharField('송장 종류', choices=TYPE_CHOICES, max_length=100)
+    
+    class Meta:
+        verbose_name = "송장 엑셀"
+        verbose_name_plural = "송장 엑셀들"

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="POST" enctype="multipart/form-data" action="{% url 'excel_upload' %}">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="업로드">
+    </form>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.querySelectorAll('.nav-link')[2].classList.add('active')
+</script>
+{% endblock %}
