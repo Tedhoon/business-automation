@@ -23,7 +23,7 @@
     <tbody>
       <tr>
         <th scope="row"></th>
-        <td>{{data.excel_file}}</td>
+        <td><a href="{{data.excel_file.url}}">{{data.excel_file}}</a></td>
         <td>{{data.source}}</td>
         <td><a href="{% url 'excel_convert_to_sebang' data.id %}">아이콘</a></td>
       </tr>

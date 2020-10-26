@@ -3,7 +3,7 @@ from .forms import *
 from .models import *
 from django.http import HttpResponse
 from openpyxl import load_workbook
-
+import pandas as pd
 
 def today_sale(request):
     context = {}
@@ -45,14 +45,18 @@ def excel_manage(request):
 def excel_convert_to_sebang(request, pk):
     print(pk)
     excel = DeliveryExcel.objects.get(id=pk)
-    load_wb = load_workbook(excel.excel_file, data_only=True)
+    target_excel = pd.read_csv(excel.excel_file)
     #시트 이름으로 불러오기
-    load_ws = load_wb['Sheet1']
-    
-    #셀 주소로 값 출력
-    print(load_ws['A1'].value)
-    
-    #셀 좌표로 값 출력
-    print(load_ws.cell(1,2).value)
+    df = pd.DataFrame(target_excel)
+    # print(df.loc[0])
+    # df.to_csv('/media/sebang/sample.csv')
+    # return HttpResponse("/media/sebang/sample.csv")
+    # return redirect('excel_manage')
 
-    return redirect('excel_manage')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=filename.csv'
+
+    df.to_csv(path_or_buf=response, float_format='%.2f', index=False, encoding='UTF-8')
+    # df.to_csv(path_or_buf=response, sep=';',float_format='%.2f', index=False, decimal=",", encoding='cp949')
+    return response
