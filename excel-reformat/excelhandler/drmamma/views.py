@@ -119,24 +119,40 @@ def cafe24_convert(excel, df):
                 is_cat = True
                 print("냐옹이 감지")
                 break
+        
 
         print("타아아입", type(i['total_price_sum']))
         if int(i['total_price_sum']) >= 100000:  
-              
-            sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
-            sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
+            if is_cat:
+                sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "10만원~").sample_cat_code
+            else:
+                sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
         
         elif int(i['total_price_sum']) >= 60000:
-            sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
-            sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
+            if is_cat:
+                sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_code
+            else:
+                sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
             
         elif int(i['total_price_sum']) >= 30000:
-            sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
-            sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
+            if is_cat:
+                sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_code
+            else:
+                sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
 
         else:
-            sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
-            sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
+            if is_cat:
+                sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "~3만원").sample_cat_code
+            else:
+                sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
 
 
         Cafe24Temp.objects.create(
