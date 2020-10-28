@@ -84,3 +84,25 @@ class Cafe24Temp(models.Model):
     total_price = models.TextField("총 주문 금액", null=True, blank=True)
     
     made_by_source = models.ForeignKey(DeliveryExcel, verbose_name="연관 엑셀", on_delete=models.CASCADE, null=True)
+
+
+PRICE_STANDARD = [
+    ('~3만원', '~3만원'),
+    ('3만원~6만원', '3만원~6만원'),
+    ('6만원~10만원', '6만원~10만원'),
+    ('10만원~', '10만원~'),
+]
+
+class Sample(models.Model):
+    sample_range = models.CharField('가격 범위', choices=PRICE_STANDARD, max_length=100)
+    sample_dog_name = models.CharField('강아지 샘플 이름', max_length=100)
+    sample_dog_code = models.CharField('강아지 샘플 코드', max_length=100)
+    sample_cat_name = models.CharField('고양이 샘플 이름', max_length=100)
+    sample_cat_code = models.CharField('고양이 샘플 코드', max_length=100)
+
+    class Meta:
+        verbose_name = "샘플"
+        verbose_name_plural = "샘플"
+        
+    def __str__(self):
+        return f'[{self.sample_range}] 범위의 샘플'
