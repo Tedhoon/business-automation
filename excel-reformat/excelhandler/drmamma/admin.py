@@ -1,22 +1,16 @@
 from django.contrib import admin
-from .models import Cafe24, DeliveryExcel, Cafe24Temp, Sample
+from .models import DeliveryExcel, Cafe24Temp, Sample, NaverFarmTemp
 from import_export.admin import ImportExportMixin
-
-
-class Cafe24Admin(ImportExportMixin, admin.ModelAdmin):
-    pass
-
-
-admin.site.register(Cafe24, Cafe24Admin)
-
 
 admin.site.register(DeliveryExcel)
 
+class NaverFarmTempAdmin(ImportExportMixin, admin.ModelAdmin):
+    pass
 
+admin.site.register(NaverFarmTemp, NaverFarmTempAdmin)
 
 class Cafe24TempAdmin(ImportExportMixin, admin.ModelAdmin):
     pass
-
 
 admin.site.register(Cafe24Temp, Cafe24TempAdmin)
 

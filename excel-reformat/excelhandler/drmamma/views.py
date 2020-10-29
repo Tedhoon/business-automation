@@ -45,204 +45,306 @@ def excel_manage(request):
     return render(request, 'excel_manage.html', context)
 
 
-def naver_farm_convert(excel, df):
-    pass
 
 
 
 
+def cafe24_convert(excel):
+    target_excel = pd.read_csv(excel.excel_file, encoding='utf-8')
+    #시트 이름으로 불러오기
+    df = pd.DataFrame(target_excel)
+    df = df.replace(np.nan, '', regex=True) # nan 없애주고 갑시당
 
-def cafe24_convert(excel, df):
     if Cafe24Temp.objects.filter(made_by_source=excel):
         print("있으니까 넘어갑시당")
     else:
         print("없으니까 생성")
         for index, row in df.iterrows():
             Cafe24Temp.objects.create(
-                order_pk = row[0], 
-                product_num = row[1], 
-                product_order_num = row[2], 
-                receiver = row[3], 
-                address = row[4], 
-                post_num = row[5], 
-                phone_num = row[6], 
-                phone_num2 = row[7], 
-                message = row[8], 
-                product_name = row[9], 
-                product_code = row[10], 
-                amount = row[11], 
-                price = row[12], 
-                discount = row[13], 
-                total_price = 0,
+                store_code = "0001", # 발주처 코드
+                order_pk = row[0], #주문번호
+                receiver = row[3], #수령인
+                address = row[4],
+                post_num = row[5],
+                phone_num = row[6],
+                phone_num2 = row[7],
+                message = row[9],
+                product_code = row[10],
+                amount = row[11],
+
+                total_price = row[12],
+                discount_product = row[13],
+                discount_coupon = row[14],
+                used_reserves = row[15],
+
                 made_by_source = excel
             )
 
     cafe24 = Cafe24Temp.objects.filter(made_by_source=excel)
-    # for obj in cafe24:
-    #     print(obj.id)
-    # print(cafe24)
-    
-    total_price = cafe24.values(
+
+    price_calculate = cafe24.values(
         'order_pk'
     ).annotate(
-        total_price_sum = Sum('price')-Sum('discount'),
-         
-        # total_discount_sum = 
+        standard_for_gift = F('total_price') - Sum('discount_product') - F('discount_coupon') - F('used_reserves'),
     )
 
 
-    
-
-    for i in total_price:
+    for i in price_calculate:
         print(i)
         
         qs_for_update = cafe24.filter(order_pk=i['order_pk'])
 
         for qs in qs_for_update:
-            total_price = i['total_price_sum']
+            total_price = i['standard_for_gift']
             qs.total_price = total_price
             qs.save()
 
         copy_qs = qs_for_update.first()
 
-
         sample_name = ''
         sample_code = ''
         is_cat = False
-        isCatFilterList = cafe24.filter(order_pk=i['order_pk'])
-        print(isCatFilterList)
-        print("여가지옴!!")
-        for detected in isCatFilterList:
-            print(detected.order_pk)
-            print(type(detected.product_code))
-            if detected.product_code in ["DM0030101", "DM0030102", "DM0030103", "DM0030104"]:
+        CatFilterList = cafe24.filter(order_pk=i['order_pk'])
+        for detected in CatFilterList:
+            if detected.product_code in ["DM0030101", "DM0030102", "DM0030103", "DM0030104", "DM0030105B"]:
                 is_cat = True
                 print("냐옹이 감지")
                 break
         
-
-        print("타아아입", type(i['total_price_sum']))
-        if int(i['total_price_sum']) >= 100000:  
+        if int(i['standard_for_gift']) >= 100000:  
             if is_cat:
-                sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
+                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
                 sample_code = Sample.objects.get(sample_range = "10만원~").sample_cat_code
             else:
-                sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
+                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
                 sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
         
-        elif int(i['total_price_sum']) >= 60000:
+        elif int(i['standard_for_gift']) >= 60000:
             if is_cat:
-                sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
+                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
                 sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_code
             else:
-                sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
+                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
                 sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
             
-        elif int(i['total_price_sum']) >= 30000:
+        elif int(i['standard_for_gift']) >= 30000:
             if is_cat:
-                sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
+                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
                 sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_code
             else:
-                sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
+                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
                 sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
 
         else:
             if is_cat:
-                sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
+                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
                 sample_code = Sample.objects.get(sample_range = "~3만원").sample_cat_code
             else:
-                sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
+                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
                 sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
 
 
         Cafe24Temp.objects.create(
-                order_pk = copy_qs.order_pk, 
-                product_num = '', 
-                product_order_num = '', 
-                receiver = copy_qs.receiver, 
-                address = copy_qs.address, 
-                post_num = copy_qs.post_num, 
-                phone_num = copy_qs.phone_num, 
-                phone_num2 = copy_qs.phone_num2, 
-                message = copy_qs.message, 
-                product_name = sample_name, 
-                product_code = sample_code, 
-                amount = "1", 
-                price = '', 
-                discount = '', 
+                store_code = "0001", # 발주처 코드
+                order_pk = copy_qs.order_pk, #주문번호
+                receiver = copy_qs.receiver ,#수령인
+                address = copy_qs.address,
+                post_num = copy_qs.post_num,
+                phone_num = copy_qs.phone_num,
+                phone_num2 = copy_qs.phone_num2,
+                message = copy_qs.message,
+                product_code = sample_code,
+                amount = "1",
+
                 total_price = '',
+                discount_product = '',
+                discount_coupon = '',
+                used_reserves = '',
+
+                made_by_source = excel
+            )
+
+    # queryset = cafe24.values_list(
+    #     "order_pk",
+    #     "product_num",
+    #     "product_order_num",
+    #     "receiver",
+    #     "address",
+    #     "post_num",
+    #     "phone_num",
+    #     "phone_num2",
+    #     "message",
+    #     "product_name",
+    #     "product_code",
+    #     "amount",
+    #     "price",
+    #     "discount",
+    #     "total_price"
+    # )
+    # converted_df = pd.DataFrame(list(queryset), columns=[
+    #     "오더 피케이",
+    #     "주문번호우",
+    #     "product_order_num",
+    #     "receiver",
+    #     "address",
+    #     "post_num",
+    #     "phone_num",
+    #     "phone_num2",
+    #     "message",
+    #     "product_name",
+    #     "product_code",
+    #     "amount",
+    #     "price",
+    #     "discount",
+    #     "total_price"
+    # ]) 
+    # return converted_df
+    return 0
+
+
+def naver_farm_convert(excel):
+    target_excel = pd.read_excel(excel.excel_file)
+    #시트 이름으로 불러오기
+    df = pd.DataFrame(target_excel)
+    df = df.replace(np.nan, '', regex=True) # nan 없애주고 갑시당
+
+
+    if NaverFarmTemp.objects.filter(made_by_source=excel):
+        print("있으니까 넘어갑시당")
+    else:
+        print("없으니까 생성")
+        for index, row in df.iterrows():
+            NaverFarmTemp.objects.create(
+                store_code = "0002",
+                # order_pk = row[], 
+                # product_num = row[], 
+                # product_order_num = row[], 
+                # receiver = row[], 
+                # address = row[], 
+                # post_num = row[], 
+                # phone_num = row[], 
+                # phone_num2 = row[], 
+                # message = row[], 
+                # product_name = row[], 
+                # product_code = row[], 
+                # amount = row[], 
+                # price = row[], 
+                # discount = row[], 
+                total_price = 0,
+                made_by_source = excel
+            )
+
+    naver_farm = NaverFarmTemp.objects.filter(made_by_source=excel)
+    
+    
+    price_calculate = cafe24.values(
+        'order_pk'
+    ).annotate(
+        standard_for_gift = F('total_price') - Sum('discount_product') - F('discount_coupon') - F('used_reserves'),
+    )
+
+
+
+    for i in price_calculate:
+        print(i)
+        
+        qs_for_update = naver_farm.filter(order_pk=i['order_pk'])
+
+        for qs in qs_for_update:
+            total_price = i['standard_for_gift']
+            qs.total_price = total_price
+            qs.save()
+
+        copy_qs = qs_for_update.first()
+
+        sample_name = ''
+        sample_code = ''
+        is_cat = False
+        CatFilterList = naver_farm.filter(order_pk=i['order_pk'])
+        for detected in CatFilterList:
+            if detected.product_code in ["DM0030101", "DM0030102", "DM0030103", "DM0030104", "DM0030105B"]:
+                is_cat = True
+                print("냐옹이 감지")
+                break
+        
+        if int(i['standard_for_gift']) >= 100000:  
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "10만원~").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
+        
+        elif int(i['standard_for_gift']) >= 60000:
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
+            
+        elif int(i['standard_for_gift']) >= 30000:
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
+
+        else:
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "~3만원").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
+
+
+        NaverFarmTemp.objects.create(
+                store_code = "0002", # 발주처 코드
+                order_pk = copy_qs.order_pk, #주문번호
+                receiver = copy_qs.receiver ,#수령인
+                address = copy_qs.address,
+                post_num = copy_qs.post_num,
+                phone_num = copy_qs.phone_num,
+                phone_num2 = copy_qs.phone_num2,
+                message = copy_qs.message,
+                product_code = sample_code,
+                amount = "1",
+
+                total_price = '',
+                discount_product = '',
+                discount_coupon = '',
+                used_reserves = '',
+
                 made_by_source = excel
             )
 
 
 
 
-
-
-
-    queryset = cafe24.values_list(
-        "order_pk",
-        "product_num",
-        "product_order_num",
-        "receiver",
-        "address",
-        "post_num",
-        "phone_num",
-        "phone_num2",
-        "message",
-        "product_name",
-        "product_code",
-        "amount",
-        "price",
-        "discount",
-        "total_price"
-    )
-    converted_df = pd.DataFrame(list(queryset), columns=[
-        "오더 피케이",
-        "주문번호우",
-        "product_order_num",
-        "receiver",
-        "address",
-        "post_num",
-        "phone_num",
-        "phone_num2",
-        "message",
-        "product_name",
-        "product_code",
-        "amount",
-        "price",
-        "discount",
-        "total_price"
-    ]) 
-    return converted_df
-
-
 def excel_convert_to_sebang(request, pk):
-    converted_df = None
+    # converted_df = None
     excel = DeliveryExcel.objects.get(id=pk)
-    target_excel = pd.read_csv(excel.excel_file, encoding='utf-8')
-    #시트 이름으로 불러오기
-    df = pd.DataFrame(target_excel)
-    df = df.replace(np.nan, '', regex=True) # nan 없애주고 갑시당
+
     if excel.source == 'CAFE 24':
         print("카페24꺼군")
-        converted_df = cafe24_convert(excel, df)
+        cafe24_convert(excel)
 
     elif excel.source == "네이버 스토어팜":
         print("스토어 팜이군!!!!")
-        naver_farm_convert(excel, df)
+        naver_farm_convert(excel)
     else: 
         pass
 
-    # converted_df.to_excel(settings.MEDIA_ROOT)
     return redirect('excel_manage')
     # response = HttpResponse(content_type='application/vnd.ms-excel') 
     # response['Content-Disposition'] = 'attachment; filename="test.xls"'
     # response = HttpResponse(content_type='text/csv')
     # response['Content-Disposition'] = 'attachment; filename = helloworld.csv'
-    writer = pd.ExcelWriter('test.xlsx')
-    converted_df.to_excel(writer)
-    writer.save()
+    # writer = pd.ExcelWriter('test.xlsx')
+    # converted_df.to_excel(writer)
+    # writer.save()
     # converted_df.to_csv(path_or_buf=response,sep=',',float_format='%.2f',index=False,decimal=",")
 
     # converted_df.to_csv(path_or_buf=response, sep=';',float_format='%.2f', index=False, decimal=",", encoding='cp949')
