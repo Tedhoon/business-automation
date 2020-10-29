@@ -62,12 +62,7 @@ class NaverFarmTemp(models.Model):
     # -------- 위까지는 엑셀에 나와야함 -------- #
 
     total_price = models.TextField("총 주문 금액", null=True, blank=True)
-    discount_product = models.TextField("상품별 추가할인금액", null=True, blank=True)
-    discount_coupon = models.TextField("쿠폰 할인 금액", null=True, blank=True)
-    used_reserves = models.TextField("사용한 적립금액", null=True, blank=True)
-
-
-    standard_for_gift = models.TextField("사은품 기준 금액", null=True, blank=True)
+    order_price = models.TextField("배송비 합계", null=True, blank=True)
 
     made_by_source = models.ForeignKey(DeliveryExcel, verbose_name="연관 엑셀", on_delete=models.CASCADE, null=True)
 

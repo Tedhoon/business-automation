@@ -68,7 +68,7 @@ def cafe24_convert(excel):
                 post_num = row[5],
                 phone_num = row[6],
                 phone_num2 = row[7],
-                message = row[9],
+                message = row[8],
                 product_code = row[10],
                 amount = row[11],
 
@@ -92,14 +92,7 @@ def cafe24_convert(excel):
     for i in price_calculate:
         print(i)
         
-        qs_for_update = cafe24.filter(order_pk=i['order_pk'])
-
-        for qs in qs_for_update:
-            total_price = i['standard_for_gift']
-            qs.total_price = total_price
-            qs.save()
-
-        copy_qs = qs_for_update.first()
+        copy_qs = cafe24.filter(order_pk=i['order_pk']).first()
 
         sample_name = ''
         sample_code = ''
@@ -214,33 +207,36 @@ def naver_farm_convert(excel):
     else:
         print("없으니까 생성")
         for index, row in df.iterrows():
+            temp_product_code = row[9]
+            if temp_product_code == '':
+                temp_product_code = row[8]
+            
             NaverFarmTemp.objects.create(
                 store_code = "0002",
-                # order_pk = row[], 
-                # product_num = row[], 
-                # product_order_num = row[], 
-                # receiver = row[], 
-                # address = row[], 
-                # post_num = row[], 
-                # phone_num = row[], 
-                # phone_num2 = row[], 
-                # message = row[], 
-                # product_name = row[], 
-                # product_code = row[], 
-                # amount = row[], 
-                # price = row[], 
-                # discount = row[], 
-                total_price = 0,
+                order_pk = row[0], #주문번호
+                receiver = row[2], #수령인
+                address = row[3],
+                post_num = row[4],
+                phone_num = row[5],
+                phone_num2 = row[6],
+                message = row[7],
+                product_code = temp_product_code,
+                amount = row[10],
+
+                total_price = row[12],
+                order_price = row[13],
+
                 made_by_source = excel
             )
+    # return 0
 
     naver_farm = NaverFarmTemp.objects.filter(made_by_source=excel)
     
     
-    price_calculate = cafe24.values(
+    price_calculate = naver_farm.values(
         'order_pk'
     ).annotate(
-        standard_for_gift = F('total_price') - Sum('discount_product') - F('discount_coupon') - F('used_reserves'),
+        standard_for_gift = Sum('total_price') + F('order_price'),
     )
 
 
@@ -248,19 +244,13 @@ def naver_farm_convert(excel):
     for i in price_calculate:
         print(i)
         
-        qs_for_update = naver_farm.filter(order_pk=i['order_pk'])
-
-        for qs in qs_for_update:
-            total_price = i['standard_for_gift']
-            qs.total_price = total_price
-            qs.save()
-
-        copy_qs = qs_for_update.first()
+        copy_qs = naver_farm.filter(order_pk=i['order_pk']).first()
 
         sample_name = ''
         sample_code = ''
         is_cat = False
         CatFilterList = naver_farm.filter(order_pk=i['order_pk'])
+        
         for detected in CatFilterList:
             if detected.product_code in ["DM0030101", "DM0030102", "DM0030103", "DM0030104", "DM0030105B"]:
                 is_cat = True
@@ -313,13 +303,10 @@ def naver_farm_convert(excel):
                 amount = "1",
 
                 total_price = '',
-                discount_product = '',
-                discount_coupon = '',
-                used_reserves = '',
+                order_price = '',
 
                 made_by_source = excel
             )
-
 
 
 
