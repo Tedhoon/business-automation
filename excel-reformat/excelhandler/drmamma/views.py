@@ -310,6 +310,124 @@ def naver_farm_convert(excel):
             )
 
 
+
+def etc_convert(excel):
+    target_excel = pd.read_excel(excel.excel_file)
+    #시트 이름으로 불러오기
+    df = pd.DataFrame(target_excel)
+    df = df.replace(np.nan, '', regex=True) # nan 없애주고 갑시당
+
+
+    if ETCTemp.objects.filter(made_by_source=excel):
+        print("있으니까 넘어갑시당")
+    else:
+        print("없으니까 생성")
+        for index, row in df.iterrows():
+            # print(row[12])
+            # temp_product_code = row[9]
+            # if temp_product_code == '':
+            #     temp_product_code = row[8]
+                
+            ETCTemp.objects.create(
+                store_code = row[1],
+                order_pk = row[2], #주문번호
+                receiver = row[3], #수령인
+                address = row[4],
+                post_num = row[5],
+                phone_num = row[6],
+                phone_num2 = row[7],
+                message = row[8],
+                product_code = row[10],
+                amount = row[11],
+
+                total_price = row[12],
+                order_price = row[13],
+
+                made_by_source = excel
+            )
+
+
+    etc = ETCTemp.objects.filter(made_by_source=excel)
+    
+    
+    price_calculate = etc.values(
+        'order_pk'
+    ).annotate(
+        standard_for_gift = Sum('total_price') + F('order_price'),
+    )
+
+
+
+    for i in price_calculate:
+        print(i)
+        
+        copy_qs = etc.filter(order_pk=i['order_pk']).first()
+
+        sample_name = ''
+        sample_code = ''
+        is_cat = False
+        CatFilterList = etc.filter(order_pk=i['order_pk'])
+        
+        for detected in CatFilterList:
+            if detected.product_code in ["DM0030101", "DM0030102", "DM0030103", "DM0030104", "DM0030105B"]:
+                is_cat = True
+                print("냐옹이 감지")
+                break
+        
+        if int(i['standard_for_gift']) >= 100000:  
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "10만원~").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
+        
+        elif int(i['standard_for_gift']) >= 60000:
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
+            
+        elif int(i['standard_for_gift']) >= 30000:
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
+
+        else:
+            if is_cat:
+                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
+                sample_code = Sample.objects.get(sample_range = "~3만원").sample_cat_code
+            else:
+                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
+                sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
+
+
+        ETCTemp.objects.create(
+                store_code = copy_qs.store_code, # 발주처 코드
+                order_pk = copy_qs.order_pk, #주문번호
+                receiver = copy_qs.receiver ,#수령인
+                address = copy_qs.address,
+                post_num = copy_qs.post_num,
+                phone_num = copy_qs.phone_num,
+                phone_num2 = copy_qs.phone_num2,
+                message = copy_qs.message,
+                product_code = sample_code,
+                amount = "1",
+
+                total_price = '',
+                order_price = '',
+
+                made_by_source = excel
+            )
+
+
+
+
 @login_required(login_url='/admin')
 def excel_convert_to_sebang(request, pk):
     # converted_df = None
@@ -322,6 +440,11 @@ def excel_convert_to_sebang(request, pk):
     elif excel.source == "네이버 스토어팜":
         print("스토어 팜이군!!!!")
         naver_farm_convert(excel)
+
+    elif excel.source == "기타":
+        print("가티")
+        etc_convert(excel)
+        
     else: 
         pass
 
