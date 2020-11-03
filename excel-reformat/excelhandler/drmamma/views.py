@@ -7,23 +7,20 @@ import pandas as pd
 import numpy as np
 from django.db.models import F, Sum, Count, Case, When
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 
-@login_required(login_url='/admin')
+
 def today_sale(request):
     context = {}
 
     return render(request, 'today_sale.html', context)
 
 
-@login_required(login_url='/admin')
 def whole_sale(request):
     context = {}
 
     return render(request, 'whole_sale.html', context)
 
 
-@login_required(login_url='/admin')
 def excel_upload(request):
     if request.method == "GET":
         context = {}
@@ -41,7 +38,6 @@ def excel_upload(request):
 
 
 
-@login_required(login_url='/admin')
 def excel_manage(request):
     context = {}
     datas = DeliveryExcel.objects.all().order_by('-uploaded_at')
@@ -53,7 +49,6 @@ def excel_manage(request):
 
 
 
-@login_required(login_url='/admin')
 def cafe24_convert(excel):
     target_excel = pd.read_csv(excel.excel_file, encoding='utf-8')
     #시트 이름으로 불러오기
@@ -200,7 +195,6 @@ def cafe24_convert(excel):
     return 0
 
 
-@login_required(login_url='/admin')
 def naver_farm_convert(excel):
     target_excel = pd.read_excel(excel.excel_file)
     #시트 이름으로 불러오기
@@ -213,10 +207,11 @@ def naver_farm_convert(excel):
     else:
         print("없으니까 생성")
         for index, row in df.iterrows():
+            # print(row[12])
             temp_product_code = row[9]
             if temp_product_code == '':
                 temp_product_code = row[8]
-            
+                
             NaverFarmTemp.objects.create(
                 store_code = "0002",
                 order_pk = row[0], #주문번호
@@ -316,7 +311,6 @@ def naver_farm_convert(excel):
 
 
 
-@login_required(login_url='/admin')
 def excel_convert_to_sebang(request, pk):
     # converted_df = None
     excel = DeliveryExcel.objects.get(id=pk)
