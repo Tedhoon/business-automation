@@ -7,20 +7,21 @@ import pandas as pd
 import numpy as np
 from django.db.models import F, Sum, Count, Case, When
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
-
+@login_required(login_url='/admin')
 def today_sale(request):
     context = {}
 
     return render(request, 'today_sale.html', context)
 
-
+@login_required(login_url='/admin')
 def whole_sale(request):
     context = {}
 
     return render(request, 'whole_sale.html', context)
 
-
+@login_required(login_url='/admin')
 def excel_upload(request):
     if request.method == "GET":
         context = {}
@@ -37,13 +38,12 @@ def excel_upload(request):
     return render(request, 'excel_upload.html', context)
 
 
-
+@login_required(login_url='/admin')
 def excel_manage(request):
     context = {}
     datas = DeliveryExcel.objects.all().order_by('-uploaded_at')
     context['datas'] = datas
     return render(request, 'excel_manage.html', context)
-
 
 
 
@@ -310,7 +310,7 @@ def naver_farm_convert(excel):
             )
 
 
-
+@login_required(login_url='/admin')
 def excel_convert_to_sebang(request, pk):
     # converted_df = None
     excel = DeliveryExcel.objects.get(id=pk)
