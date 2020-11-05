@@ -355,10 +355,8 @@ def etc_convert(excel):
         standard_for_gift = Sum('total_price') + F('order_price'),
     )
 
-    return
-
     for i in price_calculate:
-        print(i)
+        # print(i)
         
         copy_qs = etc.filter(order_pk=i['order_pk']).first()
 
