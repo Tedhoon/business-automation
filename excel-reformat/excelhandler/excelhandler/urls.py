@@ -26,6 +26,7 @@ urlpatterns = [
     path('excel_upload/', excel_upload, name="excel_upload"),
     # path('excel_convert/', excel_convert, name="excel_convert"),
     path('excel_manage/', excel_manage, name="excel_manage"),
-    path('excel_convert_to_sebang/<int:pk>', excel_convert_to_sebang, name="excel_convert_to_sebang")
+    path('excel_convert_to_sebang/<int:pk>', excel_convert_to_sebang, name="excel_convert_to_sebang"),
+    path('product_classify_count/<int:pk>', product_classify_count, name="product_classify_count")
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

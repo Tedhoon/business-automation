@@ -348,15 +348,14 @@ def etc_convert(excel):
 
 
     etc = ETCTemp.objects.filter(made_by_source=excel)
-    
-    
+
     price_calculate = etc.values(
         'order_pk'
     ).annotate(
         standard_for_gift = Sum('total_price') + F('order_price'),
     )
 
-
+    return
 
     for i in price_calculate:
         print(i)
@@ -463,3 +462,41 @@ def excel_convert_to_sebang(request, pk):
 
     return response
     
+
+def product_classify_count(request, pk):
+    excel = DeliveryExcel.objects.get(id=pk)
+
+    target = None
+
+    
+    if excel.source == 'CAFE 24':
+        print("카페24꺼군")
+        target = Cafe24Temp.objects.filter(made_by_source=excel)
+
+    elif excel.source == "네이버 스토어팜":
+        print("스토어 팜이군!!!!")
+        target = NaverFarmTemp.objects.filter(made_by_source=excel)
+
+    elif excel.source == "기타":
+        print("가티")
+        target = ETCTemp.objects.filter(made_by_source=excel)
+        
+    else: 
+        pass
+
+
+    classify_product = target.values(
+        'product_code'
+    ).annotate(
+        total_count = Sum('amount')
+    )
+
+    count_datas = []
+    for c in classify_product:
+        count_datas.append(c)
+
+    context = {}
+    datas = DeliveryExcel.objects.all().order_by('-uploaded_at')
+    context['datas'] = datas
+    context['count_datas'] = count_datas
+    return render(request, 'excel_manage.html', context)

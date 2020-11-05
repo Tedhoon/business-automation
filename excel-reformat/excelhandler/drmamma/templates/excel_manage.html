@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-
+{% load excelfilter %}
 
 <table class="table table-dark">
     <thead>
@@ -9,6 +9,7 @@
         <th scope="col">첨부 파일</th>
         <th scope="col">source</th>
         <th scope="col">엑셀 변환(세방용)</th>
+        <th scope="col">송장별 상품 count</th>
         
       </tr>
     </thead>
@@ -25,11 +26,33 @@
         <th scope="row"></th>
         <td><a href="{{data.excel_file.url}}">{{data.excel_file}}</a></td>
         <td>{{data.source}}</td>
-        <td><a href="{% url 'excel_convert_to_sebang' data.id %}">아이콘</a></td>
+        <td><a href="{% url 'excel_convert_to_sebang' data.id %}">변환</a></td>
+        <td><a href="{% url 'product_classify_count' data.id %}">개수 확인</a></td>
       </tr>
     </tbody>
     {% endfor %}
   </table>
+
+  {% if count_datas %}
+  <table class="table table-white">
+    <thead>
+      <tr>
+        <th scope="col">상품명</th>
+        <th scope="col">상품 개수</th>        
+      </tr>
+    </thead>
+    {% for cnt in count_datas %}
+    <tbody>
+      <tr>
+        <th scope="row">{{ cnt.product_code|convert_code_to_name }} </th>
+        <td>{{ cnt.total_count }}</td>
+      </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+
 
 
 {% endblock %}
