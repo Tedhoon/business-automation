@@ -89,9 +89,7 @@ def cafe24_convert(excel):
     )
 
 
-    for i in price_calculate:
-        print(i)
-        
+    for i in price_calculate:     
         copy_qs = cafe24.filter(order_pk=i['order_pk']).first()
 
         sample_name = ''
@@ -104,37 +102,14 @@ def cafe24_convert(excel):
                 print("냐옹이 감지")
                 break
         
-        if int(i['standard_for_gift']) >= 100000:  
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "10만원~").sample_cat_code
+        for single_sample in Sample.objects.all():
+            if (int(i['standard_for_gift']) > single_sample.min_range) and (int(i['standard_for_gift']) > single_sample.min_range):
+                if is_cat:
+                    sample_code = single_sample.sample_cat_code
+                else:
+                    sample_code = single_sample.sample_dog_code
             else:
-                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
-        
-        elif int(i['standard_for_gift']) >= 60000:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
-            
-        elif int(i['standard_for_gift']) >= 30000:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
-
-        else:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "~3만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
+                continue
 
 
         Cafe24Temp.objects.create(
@@ -242,9 +217,7 @@ def naver_farm_convert(excel):
 
 
 
-    for i in price_calculate:
-        print(i)
-        
+    for i in price_calculate:        
         copy_qs = naver_farm.filter(order_pk=i['order_pk']).first()
 
         sample_name = ''
@@ -258,38 +231,14 @@ def naver_farm_convert(excel):
                 print("냐옹이 감지")
                 break
         
-        if int(i['standard_for_gift']) >= 100000:  
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "10만원~").sample_cat_code
+        for single_sample in Sample.objects.all():
+            if (int(i['standard_for_gift']) > single_sample.min_range) and (int(i['standard_for_gift']) > single_sample.min_range):
+                if is_cat:
+                    sample_code = single_sample.sample_cat_code
+                else:
+                    sample_code = single_sample.sample_dog_code
             else:
-                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
-        
-        elif int(i['standard_for_gift']) >= 60000:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
-            
-        elif int(i['standard_for_gift']) >= 30000:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
-
-        else:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "~3만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
-
+                continue
 
         NaverFarmTemp.objects.create(
                 store_code = "0002", # 발주처 코드
@@ -319,11 +268,12 @@ def etc_convert(excel):
 
 
     if ETCTemp.objects.filter(made_by_source=excel):
-        
+        print("있으니까 넘어갑시당")
+    else:
         print("없으니까 생성")
         for index, row in df.iterrows():
-            print(row[1])
-            print(str(row[1]))
+            # print(row[1])
+            # print(str(row[1]))
             # print(row[12])
             # temp_product_code = row[9]
             # if temp_product_code == '':
@@ -347,9 +297,8 @@ def etc_convert(excel):
                 made_by_source = excel
             )
 
-
     etc = ETCTemp.objects.filter(made_by_source=excel)
-
+    
     price_calculate = etc.values(
         'order_pk'
     ).annotate(
@@ -357,8 +306,6 @@ def etc_convert(excel):
     )
 
     for i in price_calculate:
-        # print(i)
-        
         copy_qs = etc.filter(order_pk=i['order_pk']).first()
 
         sample_name = ''
@@ -371,39 +318,16 @@ def etc_convert(excel):
                 is_cat = True
                 print("냐옹이 감지")
                 break
-        
-        if int(i['standard_for_gift']) >= 100000:  
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "10만원~").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "10만원~").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "10만원~").sample_dog_code
-        
-        elif int(i['standard_for_gift']) >= 60000:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "6만원~10만원").sample_dog_code
-            
-        elif int(i['standard_for_gift']) >= 30000:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_cat_code
-            else:
-                # sample_name = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "3만원~6만원").sample_dog_code
 
-        else:
-            if is_cat:
-                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_cat_name
-                sample_code = Sample.objects.get(sample_range = "~3만원").sample_cat_code
+        
+        for single_sample in Sample.objects.all():
+            if (int(i['standard_for_gift']) > single_sample.min_range) and (int(i['standard_for_gift']) > single_sample.min_range):
+                if is_cat:
+                    sample_code = single_sample.sample_cat_code
+                else:
+                    sample_code = single_sample.sample_dog_code
             else:
-                # sample_name = Sample.objects.get(sample_range = "~3만원").sample_dog_name
-                sample_code = Sample.objects.get(sample_range = "~3만원").sample_dog_code
-
+                continue
 
         ETCTemp.objects.create(
                 store_code = copy_qs.store_code, # 발주처 코드
