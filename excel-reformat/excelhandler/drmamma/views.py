@@ -312,22 +312,23 @@ def naver_farm_convert(excel):
 
 
 def etc_convert(excel):
-    target_excel = pd.read_excel(excel.excel_file)
+    target_excel = pd.read_excel(excel.excel_file, dtype={"발추처코드": "object"})
     #시트 이름으로 불러오기
     df = pd.DataFrame(target_excel)
     df = df.replace(np.nan, '', regex=True) # nan 없애주고 갑시당
 
 
     if ETCTemp.objects.filter(made_by_source=excel):
-        print("있으니까 넘어갑시당")
-    else:
+        
         print("없으니까 생성")
         for index, row in df.iterrows():
+            print(row[1])
+            print(str(row[1]))
             # print(row[12])
             # temp_product_code = row[9]
             # if temp_product_code == '':
             #     temp_product_code = row[8]
-                
+            # break;    
             ETCTemp.objects.create(
                 store_code = row[1],
                 order_pk = row[2], #주문번호
