@@ -114,6 +114,8 @@ class Sample(models.Model):
     sample_dog_code = models.CharField('강아지 샘플 코드', max_length=100)
     sample_cat_name = models.CharField('고양이 샘플 이름', max_length=100)
     sample_cat_code = models.CharField('고양이 샘플 코드', max_length=100)
+    min_range = models.PositiveIntegerField('최소 금액(~원 부터)', null=True)
+    max_range = models.PositiveIntegerField('최대 금액(~원 전까지)', null=True)
 
     class Meta:
         verbose_name = "샘플"
