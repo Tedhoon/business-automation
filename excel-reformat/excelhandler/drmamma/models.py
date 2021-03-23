@@ -101,15 +101,10 @@ class ETCTemp(models.Model):
 
 
 
-PRICE_STANDARD = [
-    ('~3만원', '~3만원'),
-    ('3만원~6만원', '3만원~6만원'),
-    ('6만원~10만원', '6만원~10만원'),
-    ('10만원~', '10만원~'),
-]
+
 
 class Sample(models.Model):
-    sample_range = models.CharField('가격 범위', choices=PRICE_STANDARD, max_length=100)
+    sample_range = models.CharField('가격 범위', max_length=100)
     sample_dog_name = models.CharField('강아지 샘플 이름', max_length=100)
     sample_dog_code = models.CharField('강아지 샘플 코드', max_length=100)
     sample_cat_name = models.CharField('고양이 샘플 이름', max_length=100)

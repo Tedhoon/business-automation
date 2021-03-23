@@ -103,7 +103,7 @@ def cafe24_convert(excel):
                 break
         
         for single_sample in Sample.objects.all():
-            if (int(i['standard_for_gift']) > single_sample.min_range) and (int(i['standard_for_gift']) > single_sample.min_range):
+            if (int(i['standard_for_gift']) >= single_sample.min_range) and (int(i['standard_for_gift']) < single_sample.max_range):
                 if is_cat:
                     sample_code = single_sample.sample_cat_code
                 else:
@@ -232,7 +232,7 @@ def naver_farm_convert(excel):
                 break
         
         for single_sample in Sample.objects.all():
-            if (int(i['standard_for_gift']) > single_sample.min_range) and (int(i['standard_for_gift']) > single_sample.min_range):
+            if (int(i['standard_for_gift']) >= single_sample.min_range) and (int(i['standard_for_gift']) < single_sample.max_range):
                 if is_cat:
                     sample_code = single_sample.sample_cat_code
                 else:
@@ -321,7 +321,7 @@ def etc_convert(excel):
 
         
         for single_sample in Sample.objects.all():
-            if (int(i['standard_for_gift']) > single_sample.min_range) and (int(i['standard_for_gift']) > single_sample.min_range):
+            if (int(i['standard_for_gift']) >= single_sample.min_range) and (int(i['standard_for_gift']) < single_sample.max_range):
                 if is_cat:
                     sample_code = single_sample.sample_cat_code
                 else:
